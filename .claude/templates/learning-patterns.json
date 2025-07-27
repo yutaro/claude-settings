@@ -1,0 +1,328 @@
+{
+  "_comment": "SDAC Learning Patterns Template - This file captures successful patterns, anti-patterns, and insights discovered during development. Use {{variable}} placeholders for dynamic values.",
+  "version": "1.0.0",
+  "metadata": {
+    "last_updated": "{{timestamp}}",
+    "total_patterns": {{total_patterns}},
+    "active_rules": {{active_rules}},
+    "success_rate": {{success_rate}},
+    "learning_cycles": {{learning_cycles}}
+  },
+  "success_patterns": [
+    {
+      "id": "SP-001",
+      "name": "Resilient API Client Pattern",
+      "category": "networking",
+      "description": "Implement API clients with built-in retry logic and circuit breaker",
+      "first_observed": "2024-01-15T10:30:00Z",
+      "occurrences": 47,
+      "success_rate": 0.96,
+      "confidence": 0.92,
+      "contexts": ["microservices", "distributed_systems", "external_apis"],
+      "implementation": {
+        "template": "class ResilientAPIClient {\n  constructor(private config: ClientConfig) {\n    this.retryPolicy = new ExponentialBackoff();\n    this.circuitBreaker = new CircuitBreaker(config);\n  }\n  \n  async request<T>(endpoint: string, options?: RequestOptions): Promise<T> {\n    return this.circuitBreaker.execute(() => \n      this.retryPolicy.execute(() => \n        this.httpClient.request(endpoint, options)\n      )\n    );\n  }\n}",
+        "key_elements": [
+          "Exponential backoff retry",
+          "Circuit breaker pattern",
+          "Configurable timeouts",
+          "Error categorization"
+        ],
+        "dependencies": ["retry-library", "circuit-breaker-lib"]
+      },
+      "benefits": {
+        "reliability": 0.92,
+        "performance": 0.78,
+        "maintainability": 0.85,
+        "developer_satisfaction": 0.88
+      },
+      "metrics": {
+        "avg_error_reduction": "67%",
+        "avg_response_time_improvement": "23%",
+        "downtime_prevention": "94%"
+      },
+      "examples": [
+        {
+          "project": "user-service",
+          "file": "src/clients/PaymentClient.ts",
+          "outcome": "99.9% uptime despite payment provider issues"
+        },
+        {
+          "project": "order-service",
+          "file": "src/clients/InventoryClient.ts",
+          "outcome": "Handled Black Friday traffic surge"
+        }
+      ],
+      "evolution": [
+        {
+          "version": 1,
+          "change": "Added jitter to retry delays",
+          "improvement": "Reduced thundering herd effect by 40%"
+        },
+        {
+          "version": 2,
+          "change": "Implemented adaptive timeout",
+          "improvement": "15% better response time in degraded conditions"
+        }
+      ]
+    },
+    {
+      "id": "SP-002",
+      "name": "Layered Repository Pattern",
+      "category": "data_access",
+      "description": "Multi-layer repository with caching and transactional support",
+      "first_observed": "2024-01-20T14:45:00Z",
+      "occurrences": 38,
+      "success_rate": 0.94,
+      "confidence": 0.89,
+      "contexts": ["database", "caching", "transactions"],
+      "implementation": {
+        "template": "abstract class BaseRepository<T> {\n  constructor(\n    protected db: Database,\n    protected cache: Cache,\n    protected logger: Logger\n  ) {}\n  \n  async findById(id: string): Promise<T | null> {\n    // L1 Cache\n    const cached = await this.cache.get(this.getCacheKey(id));\n    if (cached) return cached;\n    \n    // Database\n    const entity = await this.db.findOne(this.tableName, { id });\n    if (entity) {\n      await this.cache.set(this.getCacheKey(id), entity);\n    }\n    \n    return entity;\n  }\n}",
+        "key_elements": [
+          "Multi-level caching",
+          "Transaction management",
+          "Query builder integration",
+          "Audit logging"
+        ],
+        "dependencies": ["database-lib", "cache-lib", "query-builder"]
+      },
+      "benefits": {
+        "performance": 0.91,
+        "consistency": 0.87,
+        "testability": 0.93,
+        "scalability": 0.89
+      }
+    }
+  ],
+  "anti_patterns": [
+    {
+      "id": "AP-001",
+      "name": "Synchronous API Chain",
+      "category": "performance",
+      "description": "Sequential API calls that should be parallelized",
+      "severity": "high",
+      "occurrences": 23,
+      "first_observed": "2024-01-10T09:15:00Z",
+      "detection": {
+        "ast_pattern": "await.*await.*await",
+        "regex_pattern": "await\\s+\\w+\\.\\w+\\(.*?\\);\\s*\\n\\s*.*await\\s+\\w+\\.\\w+\\(.*?\\);",
+        "indicators": [
+          "Multiple await statements in sequence",
+          "No data dependencies between calls",
+          "Same service called multiple times"
+        ]
+      },
+      "impact": {
+        "performance_degradation": "3x slower",
+        "user_experience": "Poor perceived performance",
+        "resource_usage": "Inefficient connection pooling"
+      },
+      "fix": {
+        "description": "Use Promise.all() for parallel execution",
+        "template": "// Instead of:\nconst user = await getUser(id);\nconst preferences = await getPreferences(id);\nconst history = await getHistory(id);\n\n// Use:\nconst [user, preferences, history] = await Promise.all([\n  getUser(id),\n  getPreferences(id),\n  getHistory(id)\n]);",
+        "automated": true,
+        "confidence": 0.85
+      },
+      "examples": [
+        {
+          "file": "src/services/UserService.ts",
+          "line": 45,
+          "fixed": true,
+          "improvement": "Reduced response time from 3s to 1s"
+        }
+      ]
+    },
+    {
+      "id": "AP-002",
+      "name": "God Object Controller",
+      "category": "architecture",
+      "description": "Controller with too many responsibilities",
+      "severity": "medium",
+      "occurrences": 15,
+      "detection": {
+        "metrics": {
+          "method_count": "> 20",
+          "line_count": "> 500",
+          "dependency_count": "> 10"
+        },
+        "indicators": [
+          "Multiple unrelated endpoints",
+          "Business logic in controller",
+          "Direct database access"
+        ]
+      },
+      "fix": {
+        "description": "Split into focused controllers with service layer",
+        "steps": [
+          "Extract business logic to services",
+          "Group related endpoints",
+          "Implement dependency injection",
+          "Add proper separation of concerns"
+        ]
+      }
+    }
+  ],
+  "evolution_patterns": [
+    {
+      "id": "EP-001",
+      "name": "Callback to Async/Await Migration",
+      "category": "modernization",
+      "description": "Transform callback-based code to modern async/await",
+      "occurrences": 67,
+      "success_rate": 0.98,
+      "from_pattern": {
+        "name": "Callback Hell",
+        "example": "function getData(callback) {\n  db.query('SELECT *', (err, result) => {\n    if (err) return callback(err);\n    process(result, (err, processed) => {\n      if (err) return callback(err);\n      callback(null, processed);\n    });\n  });\n}"
+      },
+      "to_pattern": {
+        "name": "Async/Await",
+        "example": "async function getData() {\n  const result = await db.query('SELECT *');\n  const processed = await process(result);\n  return processed;\n}"
+      },
+      "transformation": {
+        "automated": true,
+        "steps": [
+          "Identify callback patterns",
+          "Convert to promises if needed",
+          "Apply async/await syntax",
+          "Update error handling"
+        ],
+        "tools": ["codemod", "ast-transformer"]
+      },
+      "benefits": {
+        "readability": 0.92,
+        "error_handling": 0.88,
+        "debugging": 0.95,
+        "maintainability": 0.90
+      }
+    },
+    {
+      "id": "EP-002",
+      "name": "Monolith to Microservices",
+      "category": "architecture",
+      "description": "Gradual extraction of services from monolithic application",
+      "occurrences": 12,
+      "success_rate": 0.83,
+      "transformation_stages": [
+        {
+          "stage": 1,
+          "name": "Identify boundaries",
+          "pattern": "Domain-driven design analysis"
+        },
+        {
+          "stage": 2,
+          "name": "Extract shared libraries",
+          "pattern": "Common functionality extraction"
+        },
+        {
+          "stage": 3,
+          "name": "Implement service communication",
+          "pattern": "API gateway pattern"
+        },
+        {
+          "stage": 4,
+          "name": "Data separation",
+          "pattern": "Database per service"
+        }
+      ]
+    }
+  ],
+  "generated_rules": [
+    {
+      "id": "GR-001",
+      "name": "Enforce Retry Logic for External Calls",
+      "based_on": ["SP-001", "AP-003"],
+      "description": "All external API calls must implement retry logic",
+      "enforcement": "warning",
+      "auto_fixable": true,
+      "detection": {
+        "ast_check": "ExternalAPICall without RetryWrapper",
+        "files": ["**/*Client.ts", "**/*Service.ts"]
+      },
+      "fix_template": "wrapWithRetry({{original_call}}, { maxAttempts: 3, backoff: 'exponential' })",
+      "exceptions": ["HealthCheckClient", "MetricsClient"],
+      "effectiveness": {
+        "issues_prevented": 134,
+        "false_positives": 7,
+        "developer_acceptance": 0.91
+      }
+    },
+    {
+      "id": "GR-002",
+      "name": "Parallel Async Operations",
+      "based_on": ["AP-001"],
+      "description": "Independent async operations should run in parallel",
+      "enforcement": "error",
+      "auto_fixable": true,
+      "detection": {
+        "pattern": "Sequential awaits without dependencies"
+      }
+    }
+  ],
+  "learning_insights": [
+    {
+      "id": "LI-001",
+      "insight": "Teams using resilient patterns have 60% fewer production incidents",
+      "evidence": {
+        "sample_size": 23,
+        "period": "6 months",
+        "confidence": 0.94
+      },
+      "recommendations": [
+        "Mandate resilient patterns for all external integrations",
+        "Provide team training on circuit breaker pattern",
+        "Create shared resilience libraries"
+      ]
+    },
+    {
+      "id": "LI-002",
+      "insight": "Proper error handling reduces debugging time by 40%",
+      "evidence": {
+        "sample_size": 156,
+        "period": "3 months",
+        "confidence": 0.88
+      }
+    }
+  ],
+  "pattern_relationships": {
+    "synergies": [
+      {
+        "patterns": ["SP-001", "SP-002"],
+        "benefit": "Combining resilient clients with cached repositories provides 99.9% availability"
+      }
+    ],
+    "conflicts": [
+      {
+        "patterns": ["SP-003", "AP-002"],
+        "issue": "Over-abstraction conflicts with god object anti-pattern fixes"
+      }
+    ]
+  },
+  "metrics": {
+    "pattern_effectiveness": {
+      "success_patterns_adoption": "78%",
+      "anti_pattern_reduction": "62%",
+      "evolution_success_rate": "84%"
+    },
+    "learning_velocity": {
+      "new_patterns_per_week": 3.2,
+      "pattern_refinements_per_week": 7.8,
+      "rule_generation_rate": 1.5
+    },
+    "impact_measurements": {
+      "code_quality_improvement": "34%",
+      "bug_reduction": "51%",
+      "development_velocity_increase": "28%",
+      "developer_satisfaction_improvement": "4.2 -> 4.6 / 5.0"
+    }
+  },
+  "export_info": {
+    "format_version": "1.0.0",
+    "export_date": "{{export_date}}",
+    "next_learning_cycle": "{{next_cycle}}",
+    "sharing_enabled": true,
+    "community_contribution": {
+      "patterns_shared": 12,
+      "patterns_imported": 8,
+      "community_rank": "contributor"
+    }
+  }
+}

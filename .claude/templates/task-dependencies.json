@@ -1,0 +1,266 @@
+{
+  "_comment": "SDAC Task Dependencies Template - Defines task structure, dependencies, and parallel execution strategy. Use {{variable}} placeholders for dynamic values.",
+  "version": "1.0.0",
+  "project": {
+    "name": "{{project_name}}",
+    "branch": "{{branch_name}}",
+    "created": "{{created_timestamp}}",
+    "updated": "{{updated_timestamp}}"
+  },
+  "metadata": {
+    "total_tasks": {{total_tasks}},
+    "completed_tasks": {{completed_tasks}},
+    "critical_path_length": {{critical_path_length}},
+    "parallelization_factor": {{parallelization_factor}},
+    "estimated_completion": "{{estimated_completion}}"
+  },
+  "tasks": {
+    "T-001": {
+      "id": "T-001",
+      "title": "Setup database schema",
+      "description": "Create initial database schema with user and product tables",
+      "status": "pending",
+      "priority": {
+        "base": "high",
+        "dynamic": 9.5,
+        "factors": {
+          "blocking_factor": 3,
+          "risk_factor": 1.2,
+          "business_value": 0.9
+        }
+      },
+      "dependencies": {
+        "depends_on": [],
+        "blocks": ["T-002", "T-003", "T-005"],
+        "parallel_with": [],
+        "soft_dependencies": []
+      },
+      "complexity": {
+        "effort_hours": 4,
+        "size": "L",
+        "technical_risk": "medium",
+        "domain_complexity": "low"
+      },
+      "resources": {
+        "required_skills": ["database", "sql"],
+        "assigned_to": "worker-1",
+        "preferred_reviewer": "@database-expert"
+      },
+      "files": {
+        "creates": [
+          "src/db/schema.sql",
+          "src/db/migrations/001_initial.sql"
+        ],
+        "modifies": [
+          "src/config/database.ts"
+        ],
+        "reads": []
+      },
+      "completion": {
+        "criteria": [
+          "Schema file created",
+          "Migration tested",
+          "Documentation updated"
+        ],
+        "subtasks": [
+          {
+            "id": "T-001.1",
+            "title": "Design schema",
+            "weight": 30,
+            "status": "pending"
+          },
+          {
+            "id": "T-001.2",
+            "title": "Write migration",
+            "weight": 50,
+            "status": "pending"
+          },
+          {
+            "id": "T-001.3",
+            "title": "Test migration",
+            "weight": 20,
+            "status": "pending"
+          }
+        ],
+        "overall_progress": 0
+      },
+      "pr_assignment": "PR-1",
+      "integration_points": ["database-setup"],
+      "feature_flags": []
+    },
+    "T-002": {
+      "id": "T-002",
+      "title": "Create User model",
+      "description": "Implement User entity with repository pattern",
+      "status": "pending",
+      "priority": {
+        "base": "high",
+        "dynamic": 8.2,
+        "factors": {
+          "blocking_factor": 2,
+          "risk_factor": 1.0,
+          "business_value": 0.9
+        }
+      },
+      "dependencies": {
+        "depends_on": ["T-001"],
+        "blocks": ["T-004", "T-006"],
+        "parallel_with": ["T-003"],
+        "soft_dependencies": ["T-008"]
+      },
+      "complexity": {
+        "effort_hours": 3,
+        "size": "M",
+        "technical_risk": "low",
+        "domain_complexity": "medium"
+      },
+      "resources": {
+        "required_skills": ["typescript", "orm"],
+        "assigned_to": "worker-2",
+        "preferred_reviewer": "@backend-lead"
+      },
+      "files": {
+        "creates": [
+          "src/models/User.ts",
+          "src/repositories/UserRepository.ts",
+          "tests/models/User.test.ts"
+        ],
+        "modifies": [
+          "src/models/index.ts"
+        ],
+        "reads": [
+          "src/db/schema.sql"
+        ]
+      },
+      "completion": {
+        "criteria": [
+          "Model implemented",
+          "Repository pattern applied",
+          "Unit tests passing",
+          "Integration tests passing"
+        ],
+        "subtasks": [],
+        "overall_progress": 0
+      },
+      "pr_assignment": "PR-1",
+      "integration_points": ["model-layer"],
+      "feature_flags": []
+    }
+  },
+  "dependency_graph": {
+    "nodes": [
+      {
+        "id": "T-001",
+        "x": 0,
+        "y": 0,
+        "critical_path": true
+      },
+      {
+        "id": "T-002",
+        "x": 1,
+        "y": 0,
+        "critical_path": true
+      },
+      {
+        "id": "T-003",
+        "x": 1,
+        "y": 1,
+        "critical_path": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "T-001",
+        "to": "T-002",
+        "type": "blocks",
+        "weight": 1.0
+      },
+      {
+        "from": "T-001",
+        "to": "T-003",
+        "type": "blocks",
+        "weight": 1.0
+      }
+    ],
+    "critical_path": ["T-001", "T-002", "T-004", "T-007"],
+    "parallel_chains": [
+      ["T-002", "T-006"],
+      ["T-003", "T-005"]
+    ]
+  },
+  "priority_matrix": {
+    "immediate": ["T-001"],
+    "high_priority": ["T-002", "T-003"],
+    "medium_priority": ["T-004", "T-005", "T-006"],
+    "low_priority": ["T-007", "T-008"],
+    "backlog": []
+  },
+  "worker_assignments": {
+    "worker-1": {
+      "assigned_tasks": ["T-001", "T-005"],
+      "current_task": "T-001",
+      "estimated_free_at": "{{worker1_free_time}}",
+      "specialties": ["database", "infrastructure"]
+    },
+    "worker-2": {
+      "assigned_tasks": ["T-002", "T-006"],
+      "current_task": null,
+      "estimated_free_at": "{{worker2_free_time}}",
+      "specialties": ["backend", "api"]
+    },
+    "worker-3": {
+      "assigned_tasks": ["T-003", "T-007"],
+      "current_task": null,
+      "estimated_free_at": "{{worker3_free_time}}",
+      "specialties": ["frontend", "ui"]
+    }
+  },
+  "sync_points": [
+    {
+      "id": "SP-1",
+      "name": "Model Integration",
+      "after_tasks": ["T-002", "T-003"],
+      "before_tasks": ["T-004"],
+      "estimated_time": "{{sp1_time}}",
+      "coordination_required": true
+    },
+    {
+      "id": "SP-2",
+      "name": "API Integration",
+      "after_tasks": ["T-004", "T-005"],
+      "before_tasks": ["T-006"],
+      "estimated_time": "{{sp2_time}}",
+      "coordination_required": true
+    }
+  ],
+  "risk_registry": {
+    "R-001": {
+      "task": "T-001",
+      "risk": "Database migration complexity",
+      "probability": "medium",
+      "impact": "high",
+      "mitigation": "Create rollback scripts, test in staging"
+    },
+    "R-002": {
+      "task": "T-004",
+      "risk": "API contract changes",
+      "probability": "low",
+      "impact": "medium",
+      "mitigation": "Version API, maintain backwards compatibility"
+    }
+  },
+  "optimization_opportunities": [
+    {
+      "type": "parallelization",
+      "description": "T-002 and T-003 can be fully parallelized after T-001",
+      "benefit": "Save 3 hours",
+      "implementation": "Assign to different workers"
+    },
+    {
+      "type": "dependency_reduction",
+      "description": "T-005 soft dependency on T-003 can be removed",
+      "benefit": "Increase parallelization",
+      "implementation": "Use mock data for T-005 development"
+    }
+  ]
+}
