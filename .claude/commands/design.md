@@ -17,6 +17,45 @@ Transform any context into comprehensive design documents with automatic branch 
 /design status  # Check design completeness and workspace
 ```
 
+## Main Execution Flow
+
+When you run `/design`, it orchestrates specialized agents:
+
+```python
+# Main orchestration logic
+if args == "start":
+    # Step 1: Setup workspace and analyze context
+    Task(
+        subagent_type="sdac-design-questioner",
+        description="Begin design creation",
+        prompt="Setup branch workspace, analyze context, start Q&A process"
+    )
+    
+elif args == "qa":
+    # Step 2: Continue Q&A refinement
+    Task(
+        subagent_type="sdac-design-questioner",
+        description="Continue design refinement",
+        prompt="Load current design, ask deeper questions, update workspace"
+    )
+    
+elif args == "refine":
+    # Step 3: Polish and finalize
+    Task(
+        subagent_type="general-purpose",
+        description="Finalize design document",
+        prompt="Structure design properly, save to workspace, prepare for todos"
+    )
+    
+elif args == "status":
+    # Check design status
+    Task(
+        subagent_type="general-purpose",
+        description="Check design status",
+        prompt="Show workspace status, design completeness, and next steps"
+    )
+```
+
 ## Enhanced Execution Framework
 
 ### Phase 0: Workspace Setup (Automatic)

@@ -16,6 +16,51 @@ Execute implementation with branch-aware workspace management and dynamic agent 
 /implement reconcile # Force reconciliation check
 ```
 
+## Main Execution Flow
+
+When you run `/implement`, it orchestrates multiple specialized agents:
+
+```python
+# Main orchestration logic
+if args == "start":
+    # Pre-flight checks
+    Task(
+        subagent_type="general-purpose",
+        description="Verify workspace ready",
+        prompt="Check design and todos exist in branch workspace"
+    )
+    
+    # Launch parallel implementation
+    Task(
+        subagent_type="sdac-task-distributor",
+        description="Launch parallel agents",
+        prompt="""
+        Launch 3 parallel agents:
+        1. sdac-implementer - Build features
+        2. sdac-design-reconciler - Ensure alignment
+        3. sdac-todo-reconciler - Verify completion
+        
+        Monitor and coordinate their work.
+        """
+    )
+    
+elif args == "status":
+    # Check all agent progress
+    Task(
+        subagent_type="sdac-status-coordinator",
+        description="Aggregate agent status",
+        prompt="Show progress from all active agents in current branch"
+    )
+    
+elif args == "reconcile":
+    # Force reconciliation
+    Task(
+        subagent_type="sdac-todo-reconciler",
+        description="Deep verification",
+        prompt="Thoroughly verify all claimed completions"
+    )
+```
+
 ## Branch Workspace Integration
 
 ### Pre-Implementation Checks

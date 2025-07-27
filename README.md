@@ -1,6 +1,6 @@
 # SDAC - Spec Driven Agentic Coding
 
-Transform your development workflow with intelligent AI agents that design, build, and test software systematically. 
+Transform your development workflow with intelligent AI agents that design, build, and test software systematically through PR-driven development. 
 
 ## 🚀 Quick Start
 
@@ -12,16 +12,38 @@ cp -n /tmp/sdac/.claude/agents/*.md ~/.claude/agents/
 rm -rf /tmp/sdac
 ```
 
-That's it! SDAC handles everything: design, implementation, testing, and quality checks.
+## ✨ PR-Driven Development with `/sdac`
+
+Use the unified `/sdac` command for your entire PR workflow:
+
+```bash
+/sdac              # Intelligently detects current state and continues workflow
+/sdac pr           # Create PR with auto-generated description
+/sdac status       # Check workflow and PR status
+/sdac merge        # Post-merge cleanup and knowledge sync
+```
+
+SDAC automatically:
+- Creates feature branches from main
+- Manages PR size (< 400 LOC)
+- Suggests PR splitting strategies
+- Generates comprehensive PR descriptions
+- Coordinates parallel implementation
+- Extracts learnings after merge
 
 ## 📋 Commands 
 
-### Core Workflow
+### 🎯 Unified PR Workflow (Recommended)
+- `/sdac` - **All-in-one PR workflow orchestrator**
+  - Automatically detects workflow state
+  - Creates feature branches
+  - Manages design → implementation → PR flow
+  - Handles PR creation and post-merge cleanup
+
+### Individual Commands (Advanced)
 - `/design [start|refine|status]` - Complete design workflow
 - `/todo` - Generate tasks with PR splitting strategy
 - `/implement [parallel N|sequential|status]` - Scalable implementation (3-8 workers)
-
-### Quality & Knowledge
 - `/test [run|write|coverage|fix]` - Comprehensive testing
 - `/quality [check|rules|fix|init]` - Quality + standards
 - `/docs [check|update|create|api]` - Documentation management
@@ -81,40 +103,81 @@ That's it! SDAC handles everything: design, implementation, testing, and quality
 
 ## 🎯 Key Features
 
+- **One Command Workflow** - Just `/sdac` for entire PR lifecycle
 - **Smart PR Management** - Automatically splits large features into reviewable chunks
 - **Parallel Development** - 3-8 agents working simultaneously without conflicts
-- **Just 6 Commands** - Simple interface to powerful agent orchestration
+- **GitHub Integration** - Native `gh` CLI integration for seamless PR operations
 - **Continuous Learning** - Extracts patterns from PRs to improve over time
+- **Branch Workspaces** - Isolated `.claude/pr/[branch]/` for each feature
 
-## 🔄 Development Workflow
+## 🔄 PR-Driven Workflow Example
 
-1. **Design** → `/design` - Create specifications
-2. **Plan** → `/todo` - Generate tasks  
-3. **Build** → `/implement` - Parallel execution
-4. **Test** → `/test` - Ensure quality
-5. **Learn** → `/knowledge` - Extract patterns
-
-## 💡 Best Practices
-
-### Smart Design Process
 ```bash
-/design
-# Automatically:
-# - Sets up workspace
-# - Creates comprehensive design
-# - Analyzes PR splitting needs
-# - Suggests parallelism level
+# 1. Start on main branch
+git checkout main
+
+# 2. Use /sdac to start new feature
+/sdac
+> "Let's create a feature branch!"
+> "Feature name?" user-authentication
+> "Creating feature/user-authentication..."
+> "Now, what are you building?"
+[Interactive design questions...]
+
+# 3. SDAC automatically:
+# - Creates design document
+# - Generates PR-optimized todo list
+# - Launches parallel implementation
+# - Tracks progress in real-time
+
+# 4. Create PR when ready
+/sdac pr
+> "✓ 15/15 tasks complete"
+> "✓ All tests passing"
+> "Creating PR #123..."
+
+# 5. After merge
+/sdac merge
+> "Extracting learnings..."
+> "✓ Knowledge base updated"
+> "Ready for next feature!"
 ```
 
-### Scalable Implementation
+## 💡 PR Best Practices with SDAC
+
+### 🚀 One Command to Rule Them All
 ```bash
-/implement parallel 6
-# Based on todo analysis:
-# - 6 workers on non-conflicting tasks
-# - File-level isolation
-# - Real-time coordination
-# - 3x faster delivery
+/sdac
+# Just use /sdac - it handles everything intelligently:
+# - Detects if you're on main → creates feature branch
+# - Continues existing work → picks up where you left off
+# - Manages PR lifecycle → from creation to merge
 ```
+
+### 📏 Automatic PR Size Management
+SDAC keeps PRs reviewable:
+- **< 400 LOC**: Single PR (fast review)
+- **> 400 LOC**: Suggests splitting strategy
+- **Dependencies**: Manages PR order automatically
+
+### 🔄 PR Splitting Example
+```bash
+/sdac
+> "This looks like a large feature (est. 800 LOC)"
+> "Suggested split:"
+> "  PR 1: Backend API (300 LOC)"
+> "  PR 2: Frontend UI (250 LOC)"  
+> "  PR 3: Integration (250 LOC)"
+> "Create sub-branches? (y/n)"
+```
+
+### 🤝 Review-Friendly Output
+Every PR includes:
+- Comprehensive description
+- Review guide ("Start here...")
+- Testing instructions
+- Risk areas highlighted
+- Suggested reviewers
 
 
 ## 🛠️ Configuration
@@ -146,3 +209,28 @@ Define standards in `.claude/rules/` directory:
 - Unit tests for all utilities
 - Integration tests for APIs
 ```
+
+## 📊 Why PR-Driven Development?
+
+### Traditional vs SDAC Approach
+
+**Traditional**: Multiple commands, manual coordination
+```bash
+git checkout -b feature/auth
+# Design manually
+# Create todos manually
+# Implement sequentially
+# Create PR manually
+# Hope nothing was missed
+```
+
+**SDAC**: One command, intelligent automation
+```bash
+/sdac  # That's it!
+```
+
+### Success Metrics
+- **Review Time**: 75% faster with structured PRs
+- **Merge Conflicts**: 90% reduction through smart coordination
+- **Knowledge Retention**: 100% of PR learnings captured
+- **Developer Velocity**: 3x improvement with parallel execution

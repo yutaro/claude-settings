@@ -16,6 +16,51 @@ Create actionable todo list from design documents with branch workspace integrat
 /todo update   # Update todo list based on implementation progress
 ```
 
+## Main Execution Flow
+
+When you run `/todo`, it orchestrates specialized agents:
+
+```python
+# Main orchestration logic
+if args == "" or args == "generate":
+    # Step 1: Analyze design document
+    Task(
+        subagent_type="general-purpose",
+        description="Analyze design",
+        prompt="Load design from branch workspace, assess complexity"
+    )
+    
+    # Step 2: Generate comprehensive todos
+    Task(
+        subagent_type="sdac-todo-generator",
+        description="Create task list",
+        prompt="Generate prioritized tasks with dependencies and effort estimates"
+    )
+    
+    # Step 3: Analyze PR strategy
+    Task(
+        subagent_type="sdac-pr-splitter",
+        description="Determine PR strategy",
+        prompt="Analyze if PR splitting needed based on task count and complexity"
+    )
+    
+elif args == "status":
+    # Check todo status
+    Task(
+        subagent_type="general-purpose",
+        description="Show todo status",
+        prompt="Display task statistics and completion progress"
+    )
+    
+elif args == "update":
+    # Update based on progress
+    Task(
+        subagent_type="sdac-todo-reconciler",
+        description="Update todo list",
+        prompt="Sync todo status with actual implementation progress"
+    )
+```
+
 ## Enhanced Process with Branch Workspace
 
 ### Phase 1: Design Analysis with Branch Context
